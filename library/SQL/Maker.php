@@ -341,6 +341,13 @@ class Maker {
                         $holder = "( $holder )";
                         break;
                     }
+                    if ( preg_match( '/^-(between)/i', $op, $matches ) ) {
+                        $params = array_merge( $params, $p );
+
+                        $op     = strtoupper( $matches[1] );
+                        $holder = " ? AND ? ";
+                        break;
+                    }
                     array_push( $params, $p );
                     break;
                 default:
