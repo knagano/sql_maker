@@ -60,6 +60,23 @@ class Maker {
         return array( $sql, $params );
     }
 
+    public function upsert ( $table, $data ) {
+        if ( self::getType( $data ) !== 'hash' ) {
+            throw new \Exception( 'Unknown type' );
+        }
+
+        list( $sql, $params ) = $this->insert( $table, $data );
+
+        $on_duplicate = array();
+        foreach ( array_keys( $data ) as $column ) {
+            $quoted = self::_quote( $column );
+            $on_duplicate[] = sprintf( '%s = VALUES(%s)', $quoted, $quoted );
+        }
+        $sql .= ' ON DUPLICATE KEY UPDATE ' . implode( ', ', $on_duplicate );
+
+        return array( $sql, $params );
+    }
+
     private function _update ( $data ) {
         switch ( self::getType( $data ) ) {
             case 'hash':

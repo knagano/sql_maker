@@ -39,6 +39,21 @@ class SQLMakerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals( array( 1, 'sample' ), $params );
     }
 
+    public function testUpsert()
+    {
+        list( $sql, $params ) = $this->object->upsert(
+            'user',
+            array( 'id' => 1, 'name' => 'sample' )
+        );
+
+        $this->assertEquals(
+            'INSERT INTO `user` ( `id`,`name` ) VALUES ( ?,? ) ON DUPLICATE KEY UPDATE `id` = VALUES(`id`), `name` = VALUES(`name`)',
+            $sql
+        );
+
+        $this->assertEquals( array( 1, 'sample' ), $params );
+    }
+
     public function testUpdate()
     {
         list( $sql1, $params1 ) = $this->object->update(
