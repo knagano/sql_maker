@@ -39,6 +39,54 @@ class SQLMakerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals( array( 1, 'sample' ), $params );
     }
 
+    public function testBulkInsert()
+    {
+        list( $sql, $params ) = $this->object->bulk_insert(
+            'user',
+            array( array( 'id' => 1, 'name' => 'sample1' )
+                   , array( 'id' => 2, 'name' => 'sample2' )
+                   , array( 'id' => 3, 'name' => 'sample3' )
+            )
+        );
+
+        $this->assertEquals(
+            'INSERT INTO `user` ( `id`,`name` ) VALUES ( ?,? ),( ?,? ),( ?,? )',
+            $sql
+        );
+
+        $this->assertEquals( array( 1, 'sample1', 2, 'sample2', 3, 'sample3' ), $params );
+
+        try {
+            $this->object->bulk_insert( 'table1', 'foo' );
+            $this->fail();
+        } catch ( \Exception $e ) {
+            $this->assertEquals( 'Invalid argument', $e->getMessage() );
+        }
+
+        try {
+            $this->object->bulk_insert( 'table1', array() );
+            $this->fail();
+        } catch ( \Exception $e ) {
+            $this->assertEquals( 'Invalid argument', $e->getMessage() );
+        }
+
+        try {
+            $this->object->bulk_insert( 'table1', array( 'foo' ) );
+            $this->fail();
+        } catch ( \Exception $e ) {
+            $this->assertEquals( 'Unknown type', $e->getMessage() );
+        }
+
+        try {
+            $this->object->bulk_insert( 'table1',
+                                        array( array( 'col1' => 'val' ),
+                                               array( 'col1' => 'val', 'col2' => 'val' ) ) );
+            $this->fail();
+        } catch ( \Exception $e ) {
+            $this->assertEquals( 'Invalid argument', $e->getMessage() );
+        }
+    }
+
     public function testUpsert()
     {
         list( $sql, $params ) = $this->object->upsert(
