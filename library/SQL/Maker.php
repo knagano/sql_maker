@@ -84,7 +84,7 @@ class Maker {
 
         $params = array();
         foreach ( $rows as $row ) {
-            array_splice( $params, count( $params ), 0, $row );
+            foreach ( array_values( $row ) as $param ) { $params[] = $param; }
         }
 
         return array( $sql, $params );
