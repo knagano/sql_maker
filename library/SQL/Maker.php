@@ -107,6 +107,23 @@ class Maker {
         return array( $sql, $params );
     }
 
+    public function upsertWithOp ( $table, $data, $opData ) {
+        if ( self::getType( $data ) !== 'hash' ) {
+            throw new \Exception( 'Unknown type' );
+        }
+
+        list( $sql, $params ) = $this->insert( $table, $data );
+
+        $on_duplicate = array();
+        foreach ( $opData as $key => $val ) {
+            $quoted = self::_quote( $key );
+            $on_duplicate[] = sprintf( '%s = %s %s', $quoted, $quoted, $val );
+        }
+        $sql .= ' ON DUPLICATE KEY UPDATE ' . implode( ', ', $on_duplicate );
+
+        return array( $sql, $params );
+    }
+
     private function _update ( $data ) {
         switch ( self::getType( $data ) ) {
             case 'hash':
